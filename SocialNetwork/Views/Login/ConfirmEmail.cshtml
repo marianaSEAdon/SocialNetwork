@@ -1,0 +1,10 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Confirmation";
+    Layout = "_LayoutAnonymous";
+}
+<div class="alert alert-success" role="alert">
+    @Model - <a class="text-decoration-none text-primary" asp-controller="Login" asp-action="Index">Sign in</a>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+</div>

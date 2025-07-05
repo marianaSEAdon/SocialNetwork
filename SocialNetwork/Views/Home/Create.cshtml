@@ -1,0 +1,50 @@
+﻿@model CreatePostViewModel
+@{
+    ViewData["Title"] = "Create Post";
+}
+
+
+<div class="justify-content-center" style="margin-top: 3rem;">
+    <div class="col-12 col-md-6 offset-md-3">
+        <div class="card shadow rounded-4 border-0">
+            <div class="card-header text-light text-center rounded-top-4" style="background: linear-gradient(90deg, #7952b3, #6f42c1);">
+                <h4 class="m-0">New Post</h4>
+                <small>Please register to continue</small>
+            </div>
+            <div class="card-body p-4">
+                @if (ViewBag.HasError != null && ViewBag.HasError)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        @foreach (var error in ViewBag.Errors)
+                        {
+                            <p class="text-danger">@error</p>
+                        }
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button>
+                    </div>
+                }
+                <form asp-controller="Home" asp-action="Create" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" asp-for="UserId" />
+                    <div class="mb-3">
+                        <label asp-for="Text" class="form-label">Text:</label>
+                        <textarea class="form-control" asp-for="Text"></textarea>
+                        <span asp-validation-for="Text" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Imagen" class="form-label">Imagen:</label>
+                        <input class="form-control" asp-for="Imagen" />
+                        <span asp-validation-for="Imagen" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Video" class="form-label">Video</label>
+                        <input class="form-control" asp-for="Video" />
+                    </div>
+                
+                    <div>
+                        <button type="submit" class="btn btn-outline-primary float-end">Save</button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-warning float-end me-2">Back to home</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

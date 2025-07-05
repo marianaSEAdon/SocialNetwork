@@ -1,0 +1,105 @@
+﻿@using SocialNetwork.Core.Domain.Base.Enums
+@model FriendRequestListViewModel
+
+@{
+    ViewData["Title"] = "Friend Request";
+}
+
+
+<div class="row mb-4">
+    <div class="col">
+        <a asp-controller="FriendRequest" asp-action="Index" class="btn w-15 me-1"
+           style="border: 1px solid #7952b3; color: #7952b3; background-color: transparent;"
+           onmouseover="this.style.backgroundColor='#7952b3'; this.style.color='white';"
+           onmouseout="this.style.backgroundColor='transparent'; this.style.color='#7952b3';">
+            Create new requests
+        </a>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h5>Pending Requests</h5>
+
+    @if (Model.PendingRequests == null || !Model.PendingRequests.Any())
+    {
+        <div class="alert alert-info mt-4">
+            You don't have any pending request
+        </div>
+    }
+    else
+    {
+
+            <div class="mt-3">
+                <div class="friend-section mb-2" style="max-height: 400px; overflow-y: auto;">
+                    @foreach (var user in Model.PendingRequests)
+                    {
+                        <div class="friend mb-3 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@Url.Content("~/" + user.ProfileImage)" class="rounded-circle" alt="Foto de perfil" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <strong>@user.FirstName @user.LastName</strong><br />
+                                        <small class="text-muted">@user.UserName</small>
+                                    </div>
+                                    <form asp-controller="FriendRequest" asp-action="Accept" method="post">
+                                        <input type="hidden" name="UserId" value="@user.Id" />
+                                        <button type="submit" class="btn btn-outline-success">Accept</button>
+                                    </form>
+
+                                    <form asp-controller="FriendRequest" asp-action="Reject" method="post">
+                                        <input type="hidden" name="UserId" value="@user.Id" />
+                                        <button type="submit" class="btn btn-outline-danger">Reject</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+
+
+       
+    }
+
+    <h5>Sent Requests</h5>
+    
+    @if (Model.SentRequests == null || !Model.SentRequests.Any())
+    {
+        <div class="alert alert-info mt-4">
+            You haven't sent any request
+        </div>
+    }
+    else
+    {
+
+        
+        <div class="mt-3">
+            <div class="friend-section mb-2" style="max-height: 400px; overflow-y: auto;">
+                @foreach (var user in Model.SentRequests)
+                {
+                    <div class="friend mb-3 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="@Url.Content("~/" + user.ProfileImage)" class="rounded-circle" alt="Foto de perfil" style="width: 50px; height: 50px; object-fit: cover;">
+                                <div>
+                                    <strong>@user.FirstName @user.LastName</strong><br />
+                                    <small class="text-muted">@user.UserName</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+
+    }
+
+    <div>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-warning float-end me-2">Back to home</a>
+    </div>
+
+    
+</div>

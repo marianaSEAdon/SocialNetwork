@@ -1,0 +1,46 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login Page";
+    Layout = "_LayoutAnonymous";
+}
+
+<div class="d-flex justify-content-center" style="margin-top: 3rem;">
+    <div class="col-11 col-sm-8 col-md-5 col-lg-4">
+        <div class="card shadow rounded-4 border-0">
+            <div class="card-header text-light text-center rounded-top-4" style="background: linear-gradient(90deg, #7952b3, #6f42c1);">
+                <h4 class="m-0">Welcome Back</h4>
+                <small>Please login to continue</small>
+            </div>
+            <div class="card-body p-4">
+                @Html.ValidationSummary(false, "", new { @class = "text-danger mb-3" })
+                <form asp-controller="Login" asp-action="Index" method="POST">
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label fw-semibold">Username</label>
+                        <input asp-for="UserName" class="form-control rounded-pill shadow-sm" placeholder="Enter your username" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold">Password</label>
+                        <input asp-for="Password" class="form-control rounded-pill shadow-sm" placeholder="Enter your password" type="password" />
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <button type="submit"
+                                class="btn w-50 me-1"
+                                style="border: 1px solid #7952b3; color: #7952b3; background-color: transparent;"
+                                onmouseover="this.style.backgroundColor='#7952b3'; this.style.color='white';"
+                                onmouseout="this.style.backgroundColor='transparent'; this.style.color='#7952b3';">
+                            Login
+                        </button>
+                        <a asp-controller="Login" asp-action="Register" class="btn btn-outline-primary w-50 ms-1 text-center">
+                         Register
+                        </a>
+                    </div>
+
+                    <div class="text-center">
+                        <a asp-controller="Login" asp-action="ForgotPassword" class="text-decoration-none text-primary">Forgot password?</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

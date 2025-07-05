@@ -1,0 +1,57 @@
+﻿@using SocialNetwork.Core.Domain.Base.Enums
+@model List<UserViewModel>
+
+@{
+    ViewData["Title"] = "Friend Request";
+}
+
+<div class="container mt-4">
+    <h5>@ViewData["Title"]</h5>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info mt-4">
+            There are no users
+        </div>
+    }
+    else
+    {
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+       <form asp-controller="FriendRequest" asp-action="Index">
+         <div class="mt-3">
+            <div class="friend-section mb-2" style="max-height: 400px; overflow-y: auto;">
+                    @foreach (var user in Model)
+                    {
+                        <div class="friend mb-3 p-3" style="background-color: #f8f9fa; border-radius: 10px;">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@Url.Content("~/" + user.ProfileImage)" class="rounded-circle" alt="Foto de perfil" style="width: 50px; height: 50px; object-fit: cover;">
+                                    <div>
+                                        <strong>@user.FirstName @user.LastName</strong><br />
+                                        <small class="text-muted">@user.UserName</small>
+                                    </div>
+                                    <div>
+                                        <input type="radio" name="ReceivingUserId" value="@user.Id" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div>
+                        <button type="submit" class="btn btn-outline-primary float-end">Save</button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-warning float-end me-2">Back to home</a>
+                    </div>
+            </div>
+
+         </div>
+       </form>
+
+    }
+</div>
