@@ -12,6 +12,8 @@ namespace SocialNetwork.Core.Application.ViewModels.Comment
         public required int PostId { get; set; }
         public required string UserId { get; set; }
         public int? RepliedCommentId { get; set; }
+        public string Username { get; set; } = "";
+        public string? ProfileImage { get; set; }
         public PostDto? Post { get; set; }
         public CommentViewModel? RepliedComment { get; set; }
         public ICollection<CommentViewModel> Replies { get; set; } = [];

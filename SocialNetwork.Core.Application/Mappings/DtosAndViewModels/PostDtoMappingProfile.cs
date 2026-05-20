@@ -30,6 +30,19 @@ namespace SocialNetwork.Core.Application.Mappings.DtosAndViewModels
 
             CreateMap<CreatePostViewModel, PostDto>();
 
+            CreateMap<PostDto, EditPostViewModel>()
+                .ForMember(dest => dest.CurrentImage,
+                           opt => opt.MapFrom(src => src.Imagen))
+               .ForMember(dest => dest.Comments,
+                          opt => opt.MapFrom(src => src.Comments))
+               .ForMember(dest => dest.Reactions,
+                          opt => opt.MapFrom(src => src.Reactions))
+               .ReverseMap()
+               .ForMember(dest => dest.Imagen,
+                          opt => opt.MapFrom(src => src.CurrentImage))
+               .ForMember(dest => dest.Comments, opt => opt.Ignore())
+               .ForMember(dest => dest.Reactions, opt => opt.Ignore());
+
         }
     }
 }

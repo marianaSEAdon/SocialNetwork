@@ -1,20 +1,22 @@
 ﻿
-
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using SocialNetwork.Core.Application.ViewModels.Comment;
 using SocialNetwork.Core.Application.ViewModels.Reaction;
 
 namespace SocialNetwork.Core.Application.ViewModels.Post
 {
-    public class PostViewModel: BaseViewModel<int>
+    public class EditPostViewModel
     {
-        public override int Id { get; set; }
+        public int Id { get; set; }
         public required string Text { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string? Imagen { get; set; }
+
+        [DataType(DataType.Upload)]
+        public IFormFile? Imagen { get; set; }
+        public string? CurrentImage { get; set; }
         public string? Video { get; set; }
         public required string UserId { get; set; }
-        public string Username { get; set; } = "";
-        public string? ProfileImage { get; set; }
         public ICollection<CommentViewModel>? Comments { get; set; }
         public ICollection<ReactionViewModel>? Reactions { get; set; }
     }

@@ -2,7 +2,7 @@
 @model List<PostViewModel>
 
 @{
-    ViewData["Title"] = "   Post";
+    ViewData["Title"] = "Post";
 }
 
 <div class="container">
@@ -43,18 +43,101 @@
         @foreach (var post in Model.OrderByDescending(p => p.CreatedAt))
         {
             <div class="col-12 col-md-8 col-lg-6 mb-4">
-                <div class="card">
+                <div class="card border-0 shadow-sm">
                     <div class="card-body">
                         <div class="comment mb-2 p-2" style="background-color: #f8f9fa; border-radius: 5px;">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <strong style="color: #7952b3;">UserName</strong>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <div class="d-flex align-items-center gap-2">
+                                    @if (!string.IsNullOrEmpty(post.ProfileImage))
+                                    {
+                                        <img src="@Url.Content("~/" + post.ProfileImage)"
+                                             class="rounded-circle"
+                                             width="40"
+                                             height="40"
+                                             style="object-fit: cover;" />
+                                    }
+                                    <strong style="color: #7952b3;">
+                                        @post.Username
+                                    </strong>
+
+                                </div>
+                                
+                                <div class="position-relative">
+                                    <button type="button"
+                                            class="btn p-0 menu-btn"
+                                            style="background:none; border:none;"
+                                            data-post-id="@post.Id"
+                                            id="menuBtn-@post.Id">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <div class="post-menu shadow-sm rounded-4 bg-white p-2"
+                                         data-post-id="@post.Id"
+                                         style="
+                                                display:none;
+                                                position:absolute;
+                                                right:0;
+                                                top:35px;
+                                                width:180px;
+                                                z-index:1000;">
+
+                                        <div class="modify-item d-flex align-items-center gap-3 p-2 rounded-4 bg-light mb-2">
+
+                                            <a asp-controller="Home"
+                                               asp-action="Edit"
+                                               asp-route-id="@post.Id"
+                                               class="text-decoration-none text-dark">
+
+                                                <i class="bi bi-pencil"></i>
+                                                Edit Post
+
+                                            </a>
+                                        </div>
+
+                                        <div class="modify-item d-flex align-items-center gap-3 p-2 rounded-4 bg-light">
+                                            <button type="button"
+                                                    class="btn p-0 text-decoration-none text-danger"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#Modal-@post.Id">
+                                                <i class="bi bi-trash3-fill"></i>
+                                                Delete Post
+                                            </button>
+
+                                        </div>
+                                        
+                                    </div>
+
+                                </div>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="Modal-@post.Id" tabindex="-1" aria-labelledby="modalLabel-@post.Id" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="modalLabel-@post.Id">Delete Post</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure you want to delete this post?
+                                                This action cannot be undone.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                <form asp-controller="Home" asp-action="Delete" method="post">
+                                                    <input type="hidden" name="id"
+                                                           value="@post.Id"/>
+                                                    <button type="submit" class="btn btn-outline-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                  
+                           
                         </div>
                         <p class="card-text">@post.Text</p>
                         @if (!string.IsNullOrEmpty(post.Imagen))
                         {
-                            <img src="@Url.Content("~/" + post.Imagen)" class="img-fluid rounded w-100" style="height: 300px; object-fit: cover;" alt="ups" />
+                            <img src="@Url.Content("~/" + post.Imagen)" class="img-fluid rounded w-100" style="max-height: 600px; object-fit: cover;" alt="ups" />
                         }
                         @if (!string.IsNullOrEmpty(post.Video))
                         {
@@ -102,66 +185,151 @@
                                 }
                                 <a>@post.Reactions?.Count(a => a.ReactionType == (int)ReactionType.DISLIKE)</a>
                             </form>
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="#" style="color: #7952b3">
+                            <div class="d-flex align-items-center gap-2 comment-btn" data-post-id="@post.Id"
+                                 style="cursor:pointer;">
+                                <button type="button"
+                                        class="btn p-0"
+                                        style="color: #7952b3; background:none; border:none;">
                                     <i class="bi bi-chat-dots"></i>
-                                </a>
+                                </button>
                                 <a>@post.Comments?.Count()</a>
                             </div>
                         </div>
-
-
-
                         <div class="mt-3">
-                            <div class="comments-section mb-2" style="max-height: 200px; overflow-y: auto;">
-                                
-                                @foreach (var comment in post.Comments.OrderBy(c => c.CreatedAt).Take(2))
+                            <div class="comments-section mb-2" data-post-id="@post.Id"
+                                 style="max-height: 200px; overflow-y: auto; display:none;">
+
+                                @foreach (var comment in post.Comments.Where(c => c.RepliedCommentId == null)
+                                                        .OrderBy(c => c.CreatedAt).Take(5))
                                 {
-                                    <div class="comment mb-2 p-2" style="background-color: #f8f9fa; border-radius: 5px;">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong style="color: #7952b3;">nameuser</strong>
-                                            <small class="text-muted">@comment.CreatedAt.ToString("g")</small>
-                                        </div>
-                                        <p class="mb-0">@comment.Text</p>
-                                    </div>
-                                    <div class="reply-form-container ms-4 mb-3" data-comment-id="@comment.Id" style="display: none;">
-                                        <form asp-controller="Comment" asp-action="AddComment" method="post">
-                                            <input type="hidden" name="PostId" value="@post.Id" />
-                                            <input type="hidden" name="RepliedCommentId" value="@comment.Id" />
-                                            <div class="input-group">
-                                                <textarea name="Text" class="form-control" rows="1" placeholder="Write a reply..."
-                                              style="border-color: #7952b3; resize: none;"></textarea>
-                                                <button type="submit" class="btn"
-                                                        style="background-color: #7952b3; color: white;"
-                                                        onmouseover="this.style.backgroundColor='#5e3d8a';"
-                                                        onmouseout="this.style.backgroundColor='#7952b3';">
-                                                    <i class="bi bi-send"></i>
-                                                </button>
-                                            </div>
-                                        </form>
-
-                                      </div>
-
-                                       @if (comment.Replies != null && comment.Replies.Any())
+                                    <div class="d-flex flex-start mb-4">
+                                        @if (!string.IsNullOrEmpty(comment.ProfileImage))
                                         {
-                                         <div class="replies-container ms-4">
-                                          @foreach (var reply in comment.Replies.OrderBy(r => r.CreatedAt))
-                                              {
-                                             <div class="reply mb-2 p-2" style="background-color: #f0f2f5; border-radius: 5px;">
-                                              <div class="d-flex justify-content-between align-items-center">
-                                            <strong style="color: #7952b3;">UserName</strong>
-                                            <small class="text-muted">@reply.CreatedAt.ToString("g")</small>
-                                                 </div>
-                                               <p class="mb-0">@reply.Text</p>
-                                              </div>
+                                            <img src="@Url.Content("~/" + comment.ProfileImage)"
+                                                 class="rounded-circle shadow-sm me-2"
+                                                 width="40"
+                                                 height="40"
+                                                 style="object-fit: cover;" />
+                                        }
+                                        else
+                                        {
+                                            <img src="https://via.placeholder.com/40"
+                                                 class="rounded-circle shadow-sm me-2"
+                                                 width="40"
+                                                 height="40" />
+                                        }
+
+                                        <div class="flex-grow-1 flex-shrink-1">
+
+                                            <div class="bg-light p-3 rounded-4">
+
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+
+                                                    <p class="mb-0 fw-bold" style="color: #7952b3;">
+                                                        @comment.Username
+                                                        <span class="text-muted small fw-normal">
+                                                            • @comment.CreatedAt.ToString("g")
+                                                        </span>
+                                                    </p>
+
+                                                    <button class="btn btn-sm reply-btn p-0"
+                                                            style="color: #7952b3; background:none; border:none;"
+                                                            data-comment-id="@comment.Id">
+
+                                                        <i class="bi bi-reply"></i>
+                                                        <span class="small">Reply</span>
+                                                    </button>
+                                                </div>
+                                                <p class="mb-0 text-dark">
+                                                    @comment.Text
+                                                </p>
+                                            </div>
+
+                                            <!-- Reply Form -->
+                                            <div class="reply-form-container mt-2 ms-2"
+                                                 data-comment-id="@comment.Id"
+                                                 style="display: none;">
+
+                                                <form asp-controller="Comment"
+                                                      asp-action="AddComment"
+                                                      method="post">
+
+                                                    <input type="hidden" name="PostId" value="@post.Id" />
+                                                    <input type="hidden" name="RepliedCommentId" value="@comment.Id" />
+
+                                                    <div class="input-group">
+
+                                                        <textarea name="Text"
+                                                      class="form-control"
+                                                      rows="1"
+                                                      placeholder="Write a reply..."
+                                                      style="resize: none;"></textarea>
+
+                                                        <button type="submit"
+                                                                class="btn"
+                                                                style="background-color: #7952b3; color:white;">
+
+                                                            <i class="bi bi-send"></i>
+
+                                                        </button>
+
+                                                    </div>
+
+                                                </form>
+                                                
+                                            </div>
+
+                                            <!-- Replies -->
+                                            @if (comment.Replies != null && comment.Replies.Any())
+                                            {
+                                                <div class="mt-3 ms-4 border-start ps-5">
+
+                                                    @foreach (var reply in comment.Replies.OrderBy(r => r.CreatedAt))
+                                                    {
+                                                        <div class="d-flex flex-start mb-3">
+
+                                                            @if (!string.IsNullOrEmpty(reply.ProfileImage))
+                                                            {
+                                                                <img src="@Url.Content("~/" + reply.ProfileImage)"
+                                                                     class="rounded-circle shadow-sm me-2"
+                                                                     width="35"
+                                                                     height="35"
+                                                                     style="object-fit: cover;" />
+                                                            }
+
+                                                            <div class="flex-grow-1">
+
+                                                                <div class="bg-body-tertiary p-2 rounded-4">
+
+                                                                    <div class="d-flex justify-content-between align-items-center">
+
+                                                                        <p class="mb-0 fw-semibold">
+                                                                            @reply.Username
+                                                                            <span class="text-muted small fw-normal">
+                                                                                • @reply.CreatedAt.ToString("g")
+                                                                            </span>
+                                                                        </p>
+
+                                                                    </div>
+
+                                                                    <p class="small mb-0 mt-1">
+                                                                        @reply.Text
+                                                                    </p>
+
+                                                                </div>
+
+                                                            </div>
+
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            }
+
+                                        </div>
+
+                                    </div>
                                 }
-                                           </div>
-                                      }
-                                         
-                                }
-                                <div id="all-comments" style="display: none;">
-                      
-                                </div>
 
                                 @if (post.Comments.Count() >= 2)
                                 {
@@ -170,10 +338,26 @@
                                             <small class="text-muted">Show all comments</small>
                                         </a>
                                     </div>
-
-
                                 }
                             </div>
+
+                            <form asp-controller="Comment" asp-action="AddComment">
+                                <input type="hidden" name="PostId" value="@post.Id" />
+                                <div class="input-group">
+                                    <textarea name="Text"
+                                      class="form-control"
+                                      rows="1"
+                                      placeholder="Write a comment..."
+                                      style="border-color: #7952b3; resize: none;"></textarea>
+                                    <button type="submit"
+                                            class="btn"
+                                            style="background-color: #7952b3; color: white;"
+                                            onmouseover="this.style.backgroundColor='#5e3d8a';"
+                                            onmouseout="this.style.backgroundColor='#7952b3';">
+                                        <i class="bi bi-send"></i>
+                                    </button>
+                                </div>
+                            </form>
 
                         </div>
 
@@ -188,19 +372,95 @@
 
 </div>
 
+
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.reply-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const commentId = this.getAttribute('data-comment-id');
-                const formContainer = document.querySelector(`.reply-form-container[data-comment-id="${commentId}"]`);
-                
-                document.querySelectorAll('.reply-form-container').forEach(container => {
-                    container.style.display = 'none';
-                });
-               
-                formContainer.style.display = 'block';
+
+
+    function toggleComments() {
+        document.querySelectorAll('.comment-btn').forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const postId = this.getAttribute('data-post-id');
+
+                const commentsSection = document.querySelector(
+                    `.comments-section[data-post-id="${postId}"]`
+                );
+
+                if (commentsSection.style.display === 'none') {
+                    commentsSection.style.display = 'block';
+                }
+                else {
+                    commentsSection.style.display = 'none';
+                }
+
             });
+
         });
+    }
+
+    function toggleReplyForms() {
+        document.querySelectorAll('.reply-btn').forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const commentId = this.getAttribute('data-comment-id');
+
+                const formContainer = document.querySelector(
+                    `.reply-form-container[data-comment-id="${commentId}"]`
+                );
+
+                document.querySelectorAll('.reply-form-container')
+                    .forEach(container => {
+                        container.style.display = 'none';
+                    });
+
+                formContainer.style.display = 'block';
+
+            });
+
+        });
+    }
+
+    function togglePostMenus() {
+        document.querySelectorAll('.menu-btn').forEach(button => {
+            button.addEventListener('click', function () {
+
+            const postId = this.getAttribute('data-post-id');
+
+            const currentMenu = document.querySelector(
+                `.post-menu[data-post-id="${postId}"]`
+            );
+
+            // cerrar todos
+            document.querySelectorAll('.post-menu').forEach(menu => {
+
+                if(menu !== currentMenu){
+                    menu.style.display = 'none';
+                }
+
+            });
+
+            // toggle
+            if(currentMenu.style.display === 'block'){
+                currentMenu.style.display = 'none';
+            }
+            else{
+                currentMenu.style.display = 'block';
+            }
+
+        });
+
     });
+
+    }
+
+    document.addEventListener('DOMContentLoaded', function (){
+        toggleComments();
+        toggleReplyForms();
+        togglePostMenus();
+
+    });
+
 </script>

@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialNetwork.Core.Application.Dtos.FriendRequest;
 using SocialNetwork.Core.Application.Interfaces;
+using SocialNetwork.Core.Application.ViewModels.Comment;
 using SocialNetwork.Core.Application.ViewModels.FriendRequest;
 using SocialNetwork.Core.Application.ViewModels.Post;
+using SocialNetwork.Core.Application.ViewModels.Reaction;
 using SocialNetwork.Core.Application.ViewModels.User;
 using SocialNetwork.Core.Domain.Base.Enums;
 namespace SocialNetwork.Controllers
@@ -25,53 +27,7 @@ namespace SocialNetwork.Controllers
             _postService = postService;
         }
 
-        public async Task<IActionResult> FriendsAndPosts()
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized();
-            }
-            var allRequests = await _friendRequestService.GetAll();
-
-            var friendIds = allRequests
-                .Where(fr => fr.Status == (int)FriendStatus.ACCEPTED &&
-                             (fr.RequestingUserId == userId || fr.ReceivingUserId == userId))
-                .Select(fr => fr.RequestingUserId == userId ? fr.ReceivingUserId : fr.RequestingUserId)
-                .Distinct()
-                .ToList();
-
-    
-            var friendDtos = await _accountServiceForWebApp.GetUsersByIdsAsync(friendIds);
-
-     
-            var friendViewModels = friendDtos.Select(friend => new UserViewModel
-            {
-                Id = friend.Id,
-                FirstName = friend.FirstName,
-                LastName = friend.LastName,
-                Email = friend.Email,
-                UserName = friend.UserName,
-                ProfileImage = friend.ProfileImage
-            }).ToList();
-
-           
-            var allPosts = await _postService.GetAllWithInclude();
-            var posts = allPosts
-                .Where(p => friendIds.Contains(p.UserId))
-                .ToList();
-
-            var postViewModels = _mapper.Map<List<PostViewModel>>(posts);
-
-            var model = new FriendsPostsViewModel
-            {
-                Friends = friendViewModels,
-                Posts = postViewModels
-            };
-
-            return View(model);
-        }
-
+       
 
         //Perfecto
         public async Task<IActionResult> FriendPosts()
@@ -104,7 +60,68 @@ namespace SocialNetwork.Controllers
             var posts = allPosts.Where(p => friendDtos.Select(f => f.Id).Contains(p.UserId)).ToList();
 
 
-            var postViewModels = _mapper.Map<List<PostViewModel>>(posts);
+            //var postViewModels = _mapper.Map<List<PostViewModel>>(posts);
+            var users = await _accountServiceForWebApp.GetAllUser();
+
+            var postViewModels = posts.Select(p =>
+            {
+                var postUser = users.FirstOrDefault(u => u.Id == p.UserId);
+
+                return new PostViewModel
+                {
+                    Id = p.Id,
+                    Text = p.Text,
+                    UserId = p.UserId,
+
+                    Username = postUser?.UserName ?? "Unknown",
+                    ProfileImage = postUser?.ProfileImage,
+
+                    CreatedAt = p.CreatedAt,
+                    Imagen = p.Imagen,
+                    Video = p.Video,
+
+                    Comments = p.Comments?.Select(c =>
+                    {
+                        var commentUser = users.FirstOrDefault(u => u.Id == c.UserId);
+
+                        return new CommentViewModel
+                        {
+                            Id = c.Id,
+                            Text = c.Text,
+                            UserId = c.UserId,
+
+                            Username = commentUser?.UserName ?? "Unknown",
+                            ProfileImage = commentUser?.ProfileImage,
+
+                            CreatedAt = c.CreatedAt,
+                            PostId = c.PostId,
+                            RepliedCommentId = c.RepliedCommentId,
+                            Replies = p.Comments
+                            .Where(r => r.RepliedCommentId == c.Id)
+                            .Select(r => 
+                            { var replyUser = users.FirstOrDefault(u => u.Id == r.UserId);
+                                return new CommentViewModel
+                                {
+                                    Id = r.Id,
+                                    Text = r.Text,
+                                    UserId = r.UserId,
+                                    Username = replyUser?.UserName ?? "Unknown",
+                                    ProfileImage = replyUser?.ProfileImage,
+                                    CreatedAt = r.CreatedAt,
+                                    PostId = r.PostId,
+                                    RepliedCommentId = r.RepliedCommentId
+                                };
+                            }).ToList()
+
+
+                        };
+
+                    }).ToList() ?? [],
+
+                    Reactions = _mapper.Map<ICollection<ReactionViewModel>>(p.Reactions)
+                };
+
+            }).ToList();
 
             var model = new FriendsPostsViewModel
             {

@@ -1,0 +1,459 @@
+﻿@using SocialNetwork.Core.Domain.Base.Enums
+@model FriendsPostsViewModel
+
+@{
+    ViewData["Title"] = "Friends";
+}
+
+<section class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-3 d-none d-lg-block">
+
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <h5 class="fw-bold primary-color mb-0">
+                            <i class="bi bi-person-fill"></i>
+                            My Profile
+                        </h5>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3"
+                         style="max-height:500px; overflow-y:auto;">
+
+                        <div class="friend-item d-flex align-items-center gap-3 p-2 rounded-4 bg-light">
+
+                            <div class="position-relative">
+
+                                <img src="https://i.pinimg.com/1200x/d7/0c/f5/d70cf56701c83171656ee824da775fed.jpg"
+                                     class="rounded-circle shadow-sm profile-img"
+                                     width="55"
+                                     height="55" />
+
+                                <span class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-white rounded-circle"></span>
+
+                            </div>
+
+                            <div>
+                                <div class="fw-semibold">
+                                    @@@User.FindFirstValue(ClaimTypes.Name)
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-12 col-lg-6">
+
+            @if ((Model.Posts == null || Model.Posts.Count == 0) && (Model.Friends != null && Model.Friends.Any()))
+            {
+
+                <div class="alert alert-info mt-4">
+                    Hello @User.FindFirstValue(ClaimTypes.Name), your friends don't have any posts yet.
+                </div>
+            }
+            else
+            {
+                @foreach (var post in Model.Posts.OrderByDescending(p => p.CreatedAt))
+                {
+                    <div class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="comment mb-2 p-2" style="background-color: #f8f9fa; border-radius: 5px;">
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        @if (!string.IsNullOrEmpty(post.ProfileImage))
+                                        {
+                                            <img src="@Url.Content("~/" + post.ProfileImage)"
+                                                 class="rounded-circle"
+                                                 width="40"
+                                                 height="40"
+                                                 style="object-fit: cover;" />
+                                        }
+
+                                        <strong style="color: #7952b3;">
+                                            @post.Username
+                                        </strong>
+                                    </div>
+                                </div>
+                                <p class="card-text">@post.Text</p>
+
+                                @if (!string.IsNullOrEmpty(post.Imagen))
+                                {
+                                    <img src="@Url.Content("~/" + post.Imagen)" class="img-fluid rounded w-100" style="max-height: 600px; object-fit: cover;" alt="ups" />
+                                }
+                                @if (!string.IsNullOrEmpty(post.Video))
+                                {
+                                    <div class="youtube-container ratio ratio-16x9 mb-3">
+                                        <iframe src="@post.Video"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowfullscreen></iframe>
+                                    </div>
+                                }
+                                <div class="mt-2">
+                                    <small class="text-muted">Create at: @post.CreatedAt.ToString("g")</small>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    <form asp-controller="Home" asp-action="Reaction" method="post">
+                                        <div>
+                                            @if (post.Reactions.Any(u => u.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier) && u.ReactionType == (int)ReactionType.LIKE))
+                                            {
+                                                <small class="text-muted">I Like</small>
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden" name="PostId" value="@post.Id" />
+                                                <input type="hidden" name="type" value="@( (int)ReactionType.LIKE )" />
+                                                <button type="submit" class="text-decoration-none" style="color: #7952b3; border: none; background: none;">
+                                                    <i class="bi bi-hand-thumbs-up"></i>
+                                                </button>
+                                            }
+                                            <a>@post.Reactions?.Count(a => a.ReactionType == (int)ReactionType.LIKE)</a>
+                                        </div>
+                                    </form>
+                                    <form asp-controller="Home" asp-action="Reaction" method="post">
+                                        @if (post.Reactions.Any(u => u.UserId == User.FindFirstValue(ClaimTypes.NameIdentifier) && u.ReactionType == (int)ReactionType.DISLIKE))
+                                        {
+                                            <small class="text-muted">I Dislike</small>
+                                        }
+                                        else
+                                        {
+                                            <input type="hidden" name="PostId" value="@post.Id" />
+                                            <input type="hidden" name="type" value="@( (int)ReactionType.DISLIKE )" />
+                                            <button type="submit" style="color: #7952b3; border: none; background: none;">
+                                                <i class="bi bi-hand-thumbs-down"></i>
+                                            </button>
+                                        }
+                                        <a>@post.Reactions?.Count(a => a.ReactionType == (int)ReactionType.DISLIKE)</a>
+                                    </form>
+                                    <div class="d-flex align-items-center gap-2 comment-btn" data-post-id="@post.Id"
+                                         style="cursor:pointer;">
+                                        <button type="button"
+                                                class="btn p-0"
+                                                style="color: #7952b3; background:none; border:none;">
+                                            <i class="bi bi-chat-dots"></i>
+                                        </button>
+                                        <a>@post.Comments?.Count()</a>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="comments-section mb-2" data-post-id="@post.Id" style="max-height: 200px; overflow-y: auto; display:none;">
+
+                                        @foreach (var comment in post.Comments.Where(c => c.RepliedCommentId == null)
+                                                                        .OrderBy(c => c.CreatedAt).Take(5))
+                                        {
+                                            <div class="d-flex flex-start mb-4">
+                                                @if (!string.IsNullOrEmpty(comment.ProfileImage))
+                                                {
+                                                    <img src="@Url.Content("~/" + comment.ProfileImage)"
+                                                         class="rounded-circle shadow-sm me-2"
+                                                         width="40"
+                                                         height="40"
+                                                         style="object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="https://via.placeholder.com/40"
+                                                         class="rounded-circle shadow-sm me-2"
+                                                         width="40"
+                                                         height="40" />
+                                                }
+                                                <div class="flex-grow-1 flex-shrink-1">
+
+                                                    <div class="bg-light p-3 rounded-4">
+
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+
+                                                            <p class="mb-0 fw-bold" style="color: #7952b3;">
+                                                                @comment.Username
+                                                                <span class="text-muted small fw-normal">
+                                                                    • @comment.CreatedAt.ToString("g")
+                                                                </span>
+                                                            </p>
+
+                                                            <button class="btn btn-sm reply-btn p-0"
+                                                                    style="color: #7952b3; background:none; border:none;"
+                                                                    data-comment-id="@comment.Id">
+
+                                                                <i class="bi bi-reply"></i>
+                                                                <span class="small">Reply</span>
+                                                            </button>
+
+                                                        </div>
+
+                                                        <p class="mb-0 text-dark">
+                                                            @comment.Text
+                                                        </p>
+
+                                                    </div>
+
+                                                    <!-- Reply Form -->
+                                                    <div class="reply-form-container mt-2 ms-2"
+                                                         data-comment-id="@comment.Id"
+                                                         style="display: none;">
+
+                                                        <form asp-controller="Comment"
+                                                              asp-action="AddComment"
+                                                              method="post">
+
+                                                            <input type="hidden" name="PostId" value="@post.Id" />
+                                                            <input type="hidden" name="RepliedCommentId" value="@comment.Id" />
+
+                                                            <div class="input-group">
+
+                                                                <textarea name="Text"
+                                                              class="form-control"
+                                                              rows="1"
+                                                              placeholder="Write a reply..."
+                                                              style="resize: none;"></textarea>
+
+                                                                <button type="submit"
+                                                                        class="btn"
+                                                                        style="background-color: #7952b3; color:white;">
+
+                                                                    <i class="bi bi-send"></i>
+
+                                                                </button>
+
+                                                            </div>
+
+                                                        </form>
+
+                                                    </div>
+
+                                                    <!-- Replies -->
+                                                    @if (comment.Replies != null && comment.Replies.Any())
+                                                    {
+                                                        <div class="mt-3 ms-4 border-start ps-5">
+
+                                                            @foreach (var reply in comment.Replies.OrderBy(r => r.CreatedAt))
+                                                            {
+                                                                <div class="d-flex flex-start mb-3">
+
+                                                                    @if (!string.IsNullOrEmpty(reply.ProfileImage))
+                                                                    {
+                                                                        <img src="@Url.Content("~/" + reply.ProfileImage)"
+                                                                             class="rounded-circle shadow-sm me-2"
+                                                                             width="35"
+                                                                             height="35"
+                                                                             style="object-fit: cover;" />
+                                                                    }
+
+                                                                    <div class="flex-grow-1">
+
+                                                                        <div class="bg-body-tertiary p-2 rounded-4">
+
+                                                                            <div class="d-flex justify-content-between align-items-center">
+
+                                                                                <p class="mb-0 fw-semibold">
+                                                                                    @reply.Username
+                                                                                    <span class="text-muted small fw-normal">
+                                                                                        • @reply.CreatedAt.ToString("g")
+                                                                                    </span>
+                                                                                </p>
+                                                                            </div>
+
+                                                                            <p class="small mb-0 mt-1">
+                                                                                @reply.Text
+                                                                            </p>
+
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </div>
+                                                            }
+
+                                                        </div>
+                                                    }
+
+                                                </div>
+
+                                            </div>
+                                        }
+
+                                        @if (post.Comments.Count() >= 2)
+                                        {
+                                            <div class="p-1.5">
+                                                <a>
+                                                    <small class="text-muted">Show all comments</small>
+                                                </a>
+                                            </div>
+
+
+                                        }
+                                    </div>
+
+                                    <form asp-controller="Comment" asp-action="AddComment">
+                                        <input type="hidden" name="PostId" value="@post.Id" />
+                                        <div class="input-group">
+                                            <textarea name="Text"
+                                              class="form-control"
+                                              rows="1"
+                                              placeholder="Write a comment..."
+                                              style="border-color: #7952b3; resize: none;"></textarea>
+                                            <button type="submit"
+                                                    class="btn"
+                                                    style="background-color: #7952b3; color: white;"
+                                                    onmouseover="this.style.backgroundColor='#5e3d8a';"
+                                                    onmouseout="this.style.backgroundColor='#7952b3';">
+                                                <i class="bi bi-send"></i>
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+            }
+
+        </div>
+
+        <div class="col-lg-3 d-none d-lg-block">
+
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+
+                        <h5 class="fw-bold primary-color mb-0">
+                            <i class="bi bi-people-fill me-2"></i>
+                            Friends
+                        </h5>
+
+                        @if (Model?.Friends != null && Model.Friends.Any())
+                        {
+                            <span class="badge rounded-pill primary-bg">
+                                @Model.Friends.Count()
+                            </span>
+                        }
+
+                    </div>
+
+                    @if (Model?.Friends == null || !Model.Friends.Any())
+                    {
+                        <div class="text-center py-4">
+
+                            <i class="bi bi-people fs-1 text-muted"></i>
+
+                            <p class="text-muted mt-3">
+                                You don't have any friends yet
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex flex-column gap-3"
+                             style="max-height:500px; overflow-y:auto;">
+
+                            @foreach (var friend in Model.Friends)
+                            {
+                                <div class="friend-item d-flex align-items-center gap-3 p-2 rounded-4 bg-light">
+
+                                    <div class="position-relative">
+
+                                        <img src="@Url.Content("~/" + friend.ProfileImage)"
+                                             class="rounded-circle shadow-sm profile-img"
+                                             width="55"
+                                             height="55" />
+
+                                        <span class="position-absolute bottom-0 end-0 translate-middle p-1 bg-success border border-2 border-white rounded-circle"></span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <div class="fw-semibold">
+                                            @friend.FirstName @friend.LastName
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @@@friend.UserName
+                                        </small>
+
+                                    </div>
+
+                                </div>
+                            }
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // SHOW/HIDE COMMENTS
+        document.querySelectorAll('.comment-btn').forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const postId = this.getAttribute('data-post-id');
+
+                const commentsSection = document.querySelector(
+                    `.comments-section[data-post-id="${postId}"]`
+                );
+
+                if (commentsSection.style.display === 'none') {
+                    commentsSection.style.display = 'block';
+                }
+                else {
+                    commentsSection.style.display = 'none';
+                }
+
+            });
+
+        });
+
+        document.querySelectorAll('.reply-btn').forEach(button => {
+
+            button.addEventListener('click', function () {
+
+                const commentId = this.getAttribute('data-comment-id');
+
+                const formContainer = document.querySelector(
+                    `.reply-form-container[data-comment-id="${commentId}"]`
+                );
+
+                document.querySelectorAll('.reply-form-container')
+                    .forEach(container => {
+                        container.style.display = 'none';
+                    });
+
+                formContainer.style.display = 'block';
+
+            });
+
+        });
+
+    });
+
+</script>
