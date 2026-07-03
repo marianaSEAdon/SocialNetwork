@@ -7,13 +7,12 @@ It includes user authentication, profile management, posts, nested comments, a f
 
 ---
 
-## 🏛️ Architecture & Design Patterns
+## 🏛️ Architecture & Patterns
 
-This project was developed following **Clean Architecture**, applying a clear separation of concerns across all layers.
+This project was developed following **Onion Architecture**, applying a clear separation of concerns across all layers.
 
 ### Key Features
 
-- Clean Onion Architecture
 - Repository Pattern with Generic Repositories
 - Generic Services
 - Entity Framework Core (Code First)
@@ -26,7 +25,7 @@ This project was developed following **Clean Architecture**, applying a clear se
 
 ---
 
-## 🛠️ Technologies & Architecture
+## 🛠️ Technologies
 
 - ASP.NET Core MVC (.NET 9)
 - C#
@@ -34,11 +33,6 @@ This project was developed following **Clean Architecture**, applying a clear se
 - SQL Server
 - ASP.NET Core Identity
 - AutoMapper
-- Clean Onion Architecture
-- Repository Pattern
-- Generic Services
-- DTOs
-- ViewModels with Validation
 - Bootstrap 5
 - Email Service (Shared Layer)
 
